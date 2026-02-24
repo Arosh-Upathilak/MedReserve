@@ -1,0 +1,54 @@
+name: build-lint-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  frontend-build-and-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint frontend code
+        working-directory: frontend
+        run: npm run lint -- --max-warnings=0
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+  backend-build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'   
+
+      - name: Restore backend dependencies
+        working-directory: backend/backend
+        run: dotnet restore
+
+      - name: Build backend
+        working-directory: backend/backend
+        run: dotnet build --configuration Release --no-restore

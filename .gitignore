@@ -1,0 +1,63 @@
+# Frontend
+# Logs
+frontend/logs
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+
+frontend/node_modules
+frontend/dist
+frontend/dist-ssr
+frontend/*.local
+
+# Editor directories and files
+frontend/.vscode/*
+frontend/!.vscode/extensions.json
+frontend/.idea
+frontend/.DS_Store
+frontend/*.suo
+frontend/*.ntvs*
+frontend/*.njsproj
+frontend/*.sln
+frontend/*.sw?
+
+
+
+# Backend
+
+# Build results
+backend/backend/bin/
+backend/backend/obj/
+
+# User-specific files
+backend/backend/*.user
+backend/backend/*.rsuser
+backend/backend/*.suo
+
+# Logs
+backend/backend/logs/
+backend/backend/*.log
+
+# Rider / VS Code / Visual Studio
+backend/backend/.idea/
+backend/backend/.vscode/
+backend/backend/.vs/
+
+# Publish folder
+backend/backend/publish/
+
+# Entity Framework migrations snapshot temp files (optional)
+backend/backend/Migrations/*.Designer.cs
+backend/backend/Migrations/*Snapshot.cs
+
+# OS files
+backend/backend/.DS_Store
+backend/backend/Thumbs.db
+
+# env file
+backend/backend/appsettings.json
+backend/backend/appsettings.Development.json
+backend/backend/Data/Migrations
