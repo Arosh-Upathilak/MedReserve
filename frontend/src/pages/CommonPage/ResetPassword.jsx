@@ -1,19 +1,15 @@
-import React, { useContext, useState } from 'react'
-import { assets } from '../../assets/assets_frontend/assets'
+import React, { useState } from 'react'
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
-import { Link } from 'react-router-dom';
 import { ThreeDots } from 'react-loader-spinner';
-import { RxCross2 } from "react-icons/rx";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BsArrowLeft } from "react-icons/bs";
 
 const ResetPassword = () => {
     const [showPassword, setShowPassword] = useState(false);
-    const [showResetPassword, setShowesetPassword] = useState(false);
+    const [showResetPassword, setShowResetPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const location = useLocation();
     return (
         <div className='fixed inset-0 bg-black/50 z-50 flex justify-center items-center'>
             <div className='relative bg-white rounded-2xl p-6 shadow-xl w-[90%] sm:w-[70%] md:w-[40%] lg:w-[25%] max-w-md'>
@@ -45,7 +41,7 @@ const ResetPassword = () => {
                                 <p className='text-gray-500 text-[13px]'>Re-Enter Password</p>
                                 <div className='text-[14px] w-full outline-1 rounded-md outline-gray-400 flex items-center justify-between'>
                                     <input placeholder='password' type={showPassword ? 'text' : 'password'} className='outline-none w-full  p-2' />
-                                    <button type="button" onClick={() => setShowesetPassword(prev => !prev)} >
+                                    <button type="button" onClick={() => setShowResetPassword(prev => !prev)} >
                                         {showPassword ? <FaRegEye className='w-4 h-4 text-gray-500' /> : <FaRegEyeSlash className='w-4 h-4 text-gray-500' />}
                                     </button>
                                 </div>

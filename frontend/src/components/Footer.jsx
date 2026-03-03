@@ -1,7 +1,7 @@
 import React from 'react'
 import { assets } from '../assets/assets_frontend/assets.js';
 
-const Fotter = () => {
+const Footer = () => {
     return (
         <div className='mt-20'>
             <div className='flex justify-between flex-col lg:flex-row py-10 border-b border-b-fotter-border gap-8 md:gap-0'>
@@ -41,4 +41,4 @@ const Fotter = () => {
     )
 }
 
-export default Fotter
+export default Footer

@@ -58,5 +58,7 @@ input[type="password"]::-webkit-textfield-decoration-container {
   --color-doctor-speciality-bg: #e2e5ff;
   --color-form-btn: #5f6fff;
   --color-cancel-btn: #dc2626;
+  --color-admin-active: #f2f3ff;
+  --color-admin-bg: #f8f9fd;
 }
 

@@ -1,14 +1,12 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { ThreeDots } from 'react-loader-spinner';
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BsArrowLeft } from "react-icons/bs";
 
 
 const ForgotPassword = () => {
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   return (
     <div className='fixed inset-0 bg-black/50 z-50 flex justify-center items-center'>
       <div className='relative bg-white rounded-2xl p-6 shadow-xl w-[90%] sm:w-[70%] md:w-[40%] lg:w-[25%] max-w-md'>

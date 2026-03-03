@@ -73,8 +73,8 @@ const MyProfile = () => {
           </div>
         )}
       </div>
-      <p className='text-3xl'>AAU</p>
-      <div className='border-t border-gray-500 w-full md:w-[50%] py-4 flex flex-col gap-4'>
+      <p className='text-3xl py-2'>AAU</p>
+      <div className='border-t border-gray-500 w-full md:w-[50%] py-4 flex flex-col gap-2'>
 
         <p className='underline text-gray-500 text-center'>
           CONTACT INFORMATION

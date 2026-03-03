@@ -1,20 +1,17 @@
-import React,{  createContext, useEffect, useState } from 'react'
+import React, { createContext, useState } from 'react'
 
 export const AuthContext = createContext();
 
-export const AuthProvider = ({children}) =>{
-    const [token , setToken] = useState(null);
+export const AuthProvider = ({ children }) => {
     const [authStep, setAuthStep] = useState("login");
-    useEffect(()=>{
-        const storedToken = localStorage.getItem('token');
-       if(storedToken)
-            setToken(storedToken)
-    },[])
+    const [token, setToken] = useState(() => {
+        return localStorage.getItem("token");
+    });
 
 
-    return(
-        <AuthContext.Provider value = {{token,authStep, setAuthStep}} >
+    return (
+        <AuthContext.Provider value={{ token, authStep, setAuthStep }} >
             {children}
         </AuthContext.Provider>
     )
- }
+}

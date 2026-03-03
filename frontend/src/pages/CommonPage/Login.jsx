@@ -1,5 +1,4 @@
-import React, { useContext, useState } from 'react'
-import { assets } from '../../assets/assets_frontend/assets'
+import React, {  useState } from 'react'
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { Link } from 'react-router-dom';
