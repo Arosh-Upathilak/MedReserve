@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { assets } from '../assets/assets_frontend/assets.js';
 import { Link, NavLink } from "react-router-dom";
-import { useContext } from 'react';
-import { AuthContext } from '../context/useContext.jsx';
+import { useAuthStore } from '../store/useAuthStore.js';
 import { navItems } from '../constants/constants.js';
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -10,7 +9,7 @@ const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showMobileNav, setShowMobileNav] = useState(false);
-  const { token } = useContext(AuthContext);
+  const token = useAuthStore((state) => state.token);
 
   return (
     <nav className='py-4 flex items-center justify-between border-b border-b-gray-400'>

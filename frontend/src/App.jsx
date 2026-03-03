@@ -15,37 +15,42 @@ import PatientList from './pages/Admin/PatientList';
 import DoctorList from './pages/Admin/DoctorList';
 import MainLayout from './layouts/MainLayout';
 import AdminLayout from './layouts/AdminLayout';
+import DeletePopUp from './components/DeletePopUp';
 
 function App() {
   const location = useLocation();
   const backgroundLocation = location.state && location.state.backgroundLocation;
 
   return (
-    <Routes location={backgroundLocation || location}>
+    <>
+      <Routes location={backgroundLocation || location}>
 
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/doctors" element={<Doctors />} />
-        <Route path="/doctors/:id" element={<DoctorDetails />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/my-appointment" element={<MyAppointments />} />
-        <Route path="/my-profile" element={<MyProfile />} />
-      </Route>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/doctors" element={<Doctors />} />
+          <Route path="/doctors/:id" element={<DoctorDetails />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/my-appointment" element={<MyAppointments />} />
+          <Route path="/my-profile" element={<MyProfile />} />
+        </Route>
 
-      <Route path="/login" element={<Auth />} />
-      <Route path="/signup" element={<Auth />} />
-      <Route path="/reset-password" element={<Auth />} />
-      <Route path="/forgot-password" element={<Auth />} />
+        <Route path="/login" element={<Auth />} />
+        <Route path="/signup" element={<Auth />} />
+        <Route path="/reset-password" element={<Auth />} />
+        <Route path="/forgot-password" element={<Auth />} />
 
-      <Route element={<AdminLayout />}>
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/appointment" element={<Appointment />} />
-        <Route path="/admin/doctor-list" element={<DoctorList />} />
-         <Route path="/admin/patient-list" element={<PatientList />} />
-      </Route>
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/appointment" element={<Appointment />} />
+          <Route path="/admin/doctor-list" element={<DoctorList />} />
+          <Route path="/admin/patient-list" element={<PatientList />} />
 
-    </Routes>
+        </Route>
+
+      </Routes>
+      <DeletePopUp />
+    </>
   )
 }
 

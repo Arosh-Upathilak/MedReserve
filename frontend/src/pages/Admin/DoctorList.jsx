@@ -1,15 +1,15 @@
-import React, { useState,useContext } from 'react'
+import React, { useState } from 'react'
 import { doctorsData } from '../../assets/assets_admin/assets';
 import { IoMdAdd } from "react-icons/io";
 import AddDoctor from '../../components/AddDoctor';
 import EditDoctor from '../../components/EditDoctor';
-import { DeleteContext } from '../../context/deleteContext';
+import { useDeleteStore } from "../../store/useDeleteStore";
 
 
 const DoctorList = () => {
   const [addDoctor,setAddDoctor] = useState(false)
   const [editDoctor,setEditDoctor] = useState(false)
-  const { openDelete } = useContext(DeleteContext);
+  const openDelete = useDeleteStore((state) => state.openDelete);
   return (
     <div>
       <h1 className='text-2xl font-semibold'>Doctor List</h1>

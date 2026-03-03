@@ -1,7 +1,10 @@
 import React from 'react'
 import { RxCross2 } from "react-icons/rx";
+import { useDeleteStore } from "../store/useDeleteStore";
 
 const DeletePopUp = ({ setDeletePopUp, onConfirm }) => {
+    const { isOpen, closeDelete, deleteCallback } = useDeleteStore();
+    if (!isOpen) return null;
     return (
         <div className='fixed inset-0 bg-black/50 z-50 flex justify-center items-center 
                     px-4 py-8 overflow-y-auto'>
@@ -12,7 +15,7 @@ const DeletePopUp = ({ setDeletePopUp, onConfirm }) => {
 
                 <button
                     type="button"
-                    onClick={setDeletePopUp}
+                    onClick={()=>closeDelete()}
                     className="absolute top-4 right-4"
                 >
                     <RxCross2 className="w-6 h-6" />
@@ -33,7 +36,7 @@ const DeletePopUp = ({ setDeletePopUp, onConfirm }) => {
 
                         <button
                             type="button"
-                            onClick={setDeletePopUp}
+                            onClick={()=>closeDelete()}
                             className='px-6 py-2 border border-gray-400 rounded-lg 
                          hover:bg-gray-100 transition'
                         >
