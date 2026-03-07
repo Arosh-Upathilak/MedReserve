@@ -10,6 +10,8 @@ const NavBar = () => {
   const location = useLocation();
   const [showMobileNav, setShowMobileNav] = useState(false);
   const token = useAuthStore((state) => state.token);
+  const logout = useAuthStore((state) => state.logout);
+  const user = useAuthStore((state) => state.user);
 
   return (
     <nav className='py-4 flex items-center justify-between border-b border-b-gray-400'>
@@ -19,16 +21,16 @@ const NavBar = () => {
       <ul className='hidden lg:flex gap-5 font-medium'>
         {navItems.map(item => <li key={item.to}><NavLink to={item.to} className={({ isActive }) => isActive ? "border-b-2 border-b-btn-bg" : "hover:text-btn-bg border-none transition-all duration-200"}>{item.label}</NavLink></li>)}
       </ul>
-      {!token ?
+      {token ?
         <div className='relative group hidden lg:block'>
           <div className='flex items-center justify-center gap-2 '>
-            <div className='w-9 h-9 rounded-full  flex items-center justify-center bg-gray-600 text-white font-semibold'>A</div>
+            <div className='w-9 h-9 rounded-full  flex items-center justify-center bg-gray-600 text-white font-semibold'>{user.name.slice(0,1)}</div>
             <img src={assets.dropdown_icon} className='w-2.5' />
             <div className='absolute top-0 right-0  pt-14 text-base  font-medium text-gray-400 z-20 hidden group-hover:block'>
               <div className='min-w-48 bg-stone-100 rounded-2xl flex flex-col gap-4 p-4'>
                 <NavLink to='/my-profile' className={({ isActive }) => isActive ? "text-gray-950" : "hover:text-gray-950 transition-all duration-200"}>My Profile</NavLink>
                 <NavLink to='/my-appointment' className={({ isActive }) => isActive ? "text-gray-950" : "hover:text-gray-950 transition-all duration-200"}>My Appointments</NavLink>
-                <button className='flex items-center justify-center text-white bg-btn-bg  hover:bg-btn-bg-hover text-sm'>Logout</button>
+                <button className='flex items-center justify-center text-white bg-btn-bg  hover:bg-btn-bg-hover text-sm' onClick={logout}>Logout</button>
               </div>
             </div>
           </div>
@@ -38,7 +40,7 @@ const NavBar = () => {
       }
       <button className='lg:hidden'><img src={assets.menu_icon} onClick={() => setShowMobileNav(prev => !prev)} /></button>
 
-      {/*Mobile Na bar */}
+      {/*Mobile Nav bar */}
       <div
         className={`
           lg:hidden fixed inset-0 z-50 transition-opacity duration-400
@@ -100,7 +102,7 @@ const NavBar = () => {
 
             <div className="mt-auto">
               {
-                token ? <button className="w-full py-3.5 bg-white text-cyan-900 font-medium rounded-lg hover:bg-gray-100 transition-colors">
+                token ? <button  onClick={logout} className="w-full py-3.5 bg-white text-cyan-900 font-medium rounded-lg hover:bg-gray-100 transition-colors">
                   Logout
                 </button> :
                   <button className="w-full py-3.5 bg-white text-cyan-900 font-medium rounded-lg hover:bg-gray-100 transition-colors" onClick={() => { navigate("/login", { state: { backgroundLocation: location } }); setShowMobileNav(false) }}>

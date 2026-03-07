@@ -5,9 +5,7 @@ import { useDeleteStore } from "../store/useDeleteStore";
 const DeletePopUp = () => {
     const { isOpen, closeDelete, deleteCallback } = useDeleteStore();
     if (!isOpen) return null;
-    const handleDelete = () => {
-        console.log("Delete")
-    }
+
     return (
         <div className='fixed inset-0 bg-black/50 z-50 flex justify-center items-center 
                     px-4 py-8 overflow-y-auto'>

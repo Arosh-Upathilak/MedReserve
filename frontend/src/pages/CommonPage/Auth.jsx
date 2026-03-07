@@ -12,9 +12,9 @@ const Auth = () => {
   const setAuthStep = useAuthStore((state) => state.setAuthStep);
 
   useEffect(() => {
+
     if (location.pathname === "/login") setAuthStep("login");
     if (location.pathname === "/signup") setAuthStep("signup");
-    if (location.pathname === "/reset-password") setAuthStep("reset");
     if (location.pathname === "/forgot-password") setAuthStep("forgot");
     if (location.pathname === "/verify") setAuthStep("verify");
   }, [location.pathname, setAuthStep]);
@@ -23,7 +23,6 @@ const Auth = () => {
     <div>
       {authStep === "login" && <Login />}
       {authStep === "signup" && <SignUp />}
-      {authStep === "reset" && <ResetPassword />}
       {authStep === "forgot" && <ForgotPassword />}
       {authStep === "verify" && <h1>Verify Code Form</h1>}
     </div>
