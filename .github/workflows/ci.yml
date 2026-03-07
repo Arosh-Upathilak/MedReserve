@@ -49,6 +49,10 @@ jobs:
         working-directory: backend/backend
         run: dotnet restore
 
+      - name: Check formatting
+        working-directory: backend/backend
+        run: dotnet format --verify-no-changes
+
       - name: Build backend
         working-directory: backend/backend
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration Release --no-restore -warnaserror
