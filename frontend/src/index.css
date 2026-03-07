@@ -1,13 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+@import 'react-phone-input-2/lib/style.css';
 
 @layer base {
-  * {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
+  html {
+    font-family: 'Poppins', sans-serif;
   }
-  body{
-    margin:0;
+
+  body {
+    margin: 0;
+    background-color: #ffffff;
+    color: #000000;
+  }
+
+  button {
+    cursor: pointer;
+    padding: 10px;
+  
+    transition: all 0.2s ease-in-out;
+  }
+  :root {
+    scrollbar-width: none;
     
   }
+
+  :root::-webkit-scrollbar {
+    display: none; 
+  }
+
 }
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+@layer utilities {
+  .doctor-type{
+    @apply py-2 px-3 text-[13px]  border border-doctor-border rounded-md cursor-pointer 
+  }
+}
+
+@theme {
+  --color-btn-bg: #5f6fff;
+  --color-btn-bg-hover: #3b459f;
+  --color-header-bg: #5f6fff;
+  --color-doctor-cart-bg: #eaefff;
+  --color-doctor-cart-border: #c9d8ff;
+  --color-fotter-border: #e5e7eb;
+  --color-about-hover: #5f6fff;
+  --color-doctor-border: #d1d5db;
+  --color-doctor-speciality-bg: #e2e5ff;
+  --color-form-btn: #5f6fff;
+  --color-cancel-btn: #dc2626;
+  --color-admin-active: #f2f3ff;
+  --color-admin-bg: #f8f9fd;
+}
+

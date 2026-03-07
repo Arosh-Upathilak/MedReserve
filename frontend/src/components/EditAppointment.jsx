@@ -1,0 +1,247 @@
+import React, { useState } from 'react'
+import { RxCross2 } from "react-icons/rx";
+import { IoMdAdd } from "react-icons/io";
+
+const EditAppointment = ({ setEditAppointment }) => {
+
+  const [showForm, setShowForm] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
+
+  const [appointmentDetails, setAppointmentDetails] = useState({
+    date: "",
+    time: "",
+    appointment: ""
+  });
+
+  const [appointmentsList, setAppointmentsList] = useState([]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setAppointmentDetails(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleAddDetail = () => {
+    if (!appointmentDetails.date || !appointmentDetails.time || !appointmentDetails.appointment) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    if (editIndex !== null) {
+      const updatedList = [...appointmentsList];
+      updatedList[editIndex] = appointmentDetails;
+      setAppointmentsList(updatedList);
+      setEditIndex(null);
+    } else {
+      setAppointmentsList(prev => [...prev, appointmentDetails]);
+    }
+
+    setAppointmentDetails({
+      date: "",
+      time: "",
+      appointment: ""
+    });
+
+    setShowForm(false);
+  };
+
+  const handleDelete = (index) => {
+    setAppointmentsList(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleEdit = (index) => {
+    setAppointmentDetails(appointmentsList[index]);
+    setEditIndex(index);
+    setShowForm(true);
+  };
+
+  return (
+    <div className='fixed inset-0 bg-black/50 z-50 flex justify-center items-center overflow-y-auto p-4'>
+      <div className='relative bg-white rounded-2xl p-6 shadow-xl 
+                      w-[95%] sm:w-[80%] md:w-[65%] lg:w-[50%]
+                      max-h-[90vh] overflow-y-auto'>
+        <form className='flex flex-col gap-6'>
+          <button
+            type="button"
+            onClick={() => setEditAppointment(false)}
+            className="absolute top-4 right-4"
+          >
+            <RxCross2 className="w-6 h-6" />
+          </button>
+          <p className='font-semibold text-2xl'>
+            Edit The Appointment
+          </p>
+
+          <div className="flex flex-col gap-2">
+            <label className="font-medium">
+              Doctor Name <span className='text-red-500'>*</span>
+            </label>
+            <select className="p-2 border border-gray-300 rounded-lg outline-none">
+              <option value="">Select Doctor</option>
+              <option value="dr-richard">Dr. Richard James</option>
+              <option value="dr-sarah">Dr. Sarah Parker</option>
+              <option value="dr-david">Dr. David Wilson</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="font-medium">
+              Fee <span className='text-red-500'>*</span>
+            </label>
+            <input
+              type='number'
+              placeholder='Enter the fee'
+              className='p-2 border border-gray-300 rounded-lg outline-none'
+            />
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <div className="flex justify-between items-center">
+              <label className="font-medium">
+                Appointment Details
+              </label>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForm(true);
+                  setEditIndex(null);
+                  setAppointmentDetails({
+                    date: "",
+                    time: "",
+                    appointment: ""
+                  });
+                }}
+                className="flex items-center gap-1 text-blue-600"
+              >
+                <IoMdAdd />
+                Add Details
+              </button>
+            </div>
+
+            <div className='grid grid-cols-5 bg-gray-100 p-2 rounded-md text-sm font-medium'>
+              <p className='text-center'>Id</p>
+              <p className='text-center'>Date</p>
+              <p className='text-center'>Time</p>
+              <p className='text-center'>Appointments</p>
+              <p className='text-center'>Actions</p>
+            </div>
+
+            {appointmentsList.length > 0 ? (
+              appointmentsList.map((item, index) => (
+                <div key={index} className='grid grid-cols-5 text-sm items-center py-2 '>
+
+                  <p className='text-center'>{index + 1}</p>
+                  <p className='text-center'>{item.date}</p>
+                  <p className='text-center'>{item.time}</p>
+                  <p className='text-center'>{item.appointment}</p>
+
+                  <div className="flex justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleEdit(index)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
+
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400 text-sm text-center py-2">
+                No appointment details added
+              </p>
+            )}
+
+          </div>
+
+          {showForm && (
+            <div className='px-4 py-4 rounded-xl bg-gray-100 flex flex-col gap-4 relative'>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className='absolute top-0 right-0'
+              >
+                <RxCross2 className="w-4 h-4" />
+              </button>
+
+              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+
+                <div className='flex flex-col gap-2'>
+                  <label className="font-medium">
+                    Date <span className='text-red-500'>*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={appointmentDetails.date}
+                    onChange={handleChange}
+                    className='p-2 border border-gray-300 rounded-lg outline-none'
+                  />
+                </div>
+
+                <div className='flex flex-col gap-2'>
+                  <label className="font-medium">
+                    Time <span className='text-red-500'>*</span>
+                  </label>
+                  <input
+                    type="time"
+                    name="time"
+                    value={appointmentDetails.time}
+                    onChange={handleChange}
+                    className='p-2 border border-gray-300 rounded-lg outline-none'
+                  />
+                </div>
+
+                <div className='flex flex-col gap-2'>
+                  <label className="font-medium">
+                    Appointments <span className='text-red-500'>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="appointment"
+                    placeholder='Enter number'
+                    value={appointmentDetails.appointment}
+                    onChange={handleChange}
+                    className='p-2 border border-gray-300 rounded-lg outline-none'
+                  />
+                </div>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAddDetail}
+                className='bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg'
+              >
+                {editIndex !== null ? "Update Detail" : "Save Detail"}
+              </button>
+
+            </div>
+          )}
+          <button
+            type="submit"
+            className='bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl'
+          >
+            Edit Appointment
+          </button>
+
+        </form>
+
+      </div>
+    </div>
+  )
+}
+
+export default EditAppointment
