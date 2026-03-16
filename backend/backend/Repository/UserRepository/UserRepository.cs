@@ -76,22 +76,22 @@ namespace backend.Repository
         public async Task<List<PatientDto>> GetPatientsDetails()
         {
 
-            var patients = await(
+            var patients = await (
                 from user in _applicationDbContext.Users
                 join userRole in _applicationDbContext.UserRoles on user.Id equals userRole.UserId
                 join role in _applicationDbContext.Roles on userRole.RoleId equals role.Id
                 where role.Name == "Patient"
                 select new PatientDto
-                            {
-                email = user.Email ?? "",
-                name = user.UserName ?? "",
-                birthday = user.BirthDay,
-                address = user.Address,
-                phoneNumber = user.PhoneNumber,
-                gender = user.Gender,
-                profileImageUrl = user.UserImageUrl,
-                registeredDate = user.CreatedAt
-            }
+                {
+                    email = user.Email ?? "",
+                    name = user.UserName ?? "",
+                    birthday = user.BirthDay,
+                    address = user.Address,
+                    phoneNumber = user.PhoneNumber,
+                    gender = user.Gender,
+                    profileImageUrl = user.UserImageUrl,
+                    registeredDate = user.CreatedAt
+                }
             ).ToListAsync();
 
             return patients;

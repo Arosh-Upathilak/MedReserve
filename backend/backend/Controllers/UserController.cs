@@ -202,7 +202,7 @@ namespace backend.Controllers
                 message = "Password reset successful"
             });
         }
-        
+
         [HttpGet("Get-Patient")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPatient()
@@ -215,12 +215,12 @@ namespace backend.Controllers
 
             return Ok(
                 new
-                {   
+                {
                     patients,
-                    message="Patient details received successfully"
+                    message = "Patient details received successfully"
                 }
             );
-        } 
+        }
 
     }
 }

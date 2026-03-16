@@ -11,7 +11,7 @@ namespace backend.Repository.DoctorRepository
     {
         private readonly ApplicationDbContext _applicationDbContext;
         private readonly ICloudinaryService _icloudinaryService;
-        public DoctorRepository(ApplicationDbContext applicationDbContext,ICloudinaryService icloudinaryService)
+        public DoctorRepository(ApplicationDbContext applicationDbContext, ICloudinaryService icloudinaryService)
         {
             _applicationDbContext = applicationDbContext;
             _icloudinaryService = icloudinaryService;
@@ -47,7 +47,7 @@ namespace backend.Repository.DoctorRepository
 
         public async Task DeleteDoctorById(Doctor doctor)
         {
-            if(!string.IsNullOrEmpty(doctor.DoctorImageUrl))
+            if (!string.IsNullOrEmpty(doctor.DoctorImageUrl))
                 await _icloudinaryService.DeleteCloudinaryImage(doctor.DoctorImageUrl);
             _applicationDbContext.Doctors.Remove(doctor);
             await _applicationDbContext.SaveChangesAsync();

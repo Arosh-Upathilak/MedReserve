@@ -8,8 +8,8 @@ namespace backend.Dtos.User
         public required string name { get; set; }
         public string? profileImageUrl { get; set; }
 
-        public DateOnly? birthday  { get; set; }
-        public  string? address { get; set; }
+        public DateOnly? birthday { get; set; }
+        public string? address { get; set; }
         public string? phoneNumber { get; set; }
         public Gender? gender { get; set; }
         public DateTime registeredDate { get; set; }
