@@ -202,6 +202,25 @@ namespace backend.Controllers
                 message = "Password reset successful"
             });
         }
+        
+        [HttpGet("Get-Patient")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetPatient()
+        {
+            var user = await _iuserService.GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "Invalid token or user not found" });
+
+            var patients = await _iuserRepository.GetPatientsDetails();
+
+            return Ok(
+                new
+                {   
+                    patients,
+                    message="Patient details received successfully"
+                }
+            );
+        } 
 
     }
 }
