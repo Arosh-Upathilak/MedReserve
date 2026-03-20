@@ -10,6 +10,7 @@ using backend.Repository;
 using backend.Service.CloudinaryService;
 using System.Text.Json.Serialization;
 using backend.Repository.DoctorRepository;
+using backend.Repository.AppointmentRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,6 +94,7 @@ builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 // Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
 
 // CORS

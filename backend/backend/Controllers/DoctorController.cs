@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using backend.Dtos.Doctor;
 using backend.Models;
 using backend.Repository.DoctorRepository;
@@ -135,6 +136,22 @@ namespace backend.Controllers
             {
                 currentDoctor,
                 message = "Doctor details getting successfully",
+            });
+        }
+
+        [HttpGet("GetDoctorList")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetDoctorList()
+        {
+            var user = await _iuserService.GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "Invalid token or user not found" });
+
+            var doctorList = await _idoctorRepository.GetDoctorList();
+            return Ok(new
+            {
+                doctorList,
+                message = "Doctor list getting successfully",
             });
         }
     }

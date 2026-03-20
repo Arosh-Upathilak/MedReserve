@@ -53,5 +53,15 @@ namespace backend.Repository.DoctorRepository
             await _applicationDbContext.SaveChangesAsync();
         }
 
+        public async Task<object> GetDoctorList()
+        {
+            var doctorList = await _applicationDbContext.Doctors.Select(d => new
+            {
+                d.DoctorId,
+                d.DoctorName
+            }).ToListAsync();
+            return doctorList;
+        }
+
     }
 }
