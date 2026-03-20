@@ -7,7 +7,11 @@ namespace backend.Models
         [Key]
         public Guid DoctorId { get; set; } = Guid.NewGuid();
         [Required]
-        public required string Speciality { get; set; }
+        public required string DoctorName { get; set; }
+        [Required]
+        public required string DoctorEmail { get; set; }
+        [Required]
+        public required Specialty Speciality { get; set; }
         [Required]
         public required string Education { get; set; }
         [Required]
@@ -15,7 +19,7 @@ namespace backend.Models
         public string? About { get; set; }
 
         public string? DoctorImageUrl { get; set; }
-        public List<DoctorSchedule>? Schedules { get; set; }
+        public List<DoctorSchedule>? Schedules { get; set; } = new();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -30,5 +34,17 @@ namespace backend.Models
         FourYears,
         FiveYears,
         MoreThanFiveYears
+    }
+
+    public enum Specialty
+    {
+
+        GeneralPhysician,
+        Gynecologist,
+        Dermatologist,
+        Cardiologist,
+        Pediatricians,
+        Neurologist,
+        Gastroenterologist
     }
 }

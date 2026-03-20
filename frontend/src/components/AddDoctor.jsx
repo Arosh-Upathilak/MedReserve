@@ -2,21 +2,97 @@ import React, { useState } from 'react'
 import { RxCross2 } from "react-icons/rx";
 import { MdDriveFolderUpload } from "react-icons/md";
 import { FaPen, FaTrash } from "react-icons/fa";
+import axios from 'axios';
+import toast from "react-hot-toast";
+import { ThreeDots } from 'react-loader-spinner';
+import { uploadImages } from '../utils/cloudinaryUpload.js'
+import { useAuthStore } from '../store/useAuthStore.js';
 
-const AddDoctor = ({ setAddDoctor }) => {
+const AddDoctor = ({ setAddDoctor, refreshDoctors }) => {
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState({
+    doctorProfileLink: "",
+    doctorName: "",
+    doctorSpeciality: "",
+    doctorEmail: "",
+    doctorEducation: "",
+    doctorExperience: "",
+    doctorAbout: ""
+  })
+  const backendUrl = useAuthStore((state) => state.backendUrl);
+  const token = useAuthStore((state) => state.token);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file));
+      setImage(file);
     }
   };
 
-  const handleDelete = (e) => {
-    e.preventDefault();
+  const handleDelete = () => {
     setImage(null);
+    setUserData(prev => ({
+      ...prev,
+      profileImageUrl: ""
+    }));
   };
+
+  const onChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setUserData((prev) => ({
+      ...prev, [name]: value
+    }))
+  }
+
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      let imageUrl = userData.profileImageUrl;
+      if (image) {
+        const result = await uploadImages("MedReserve/doctor", [image]);
+        imageUrl = result[0]?.url;
+      }
+
+      const payload = {
+        doctorProfileLink: imageUrl,
+        doctorName: userData.doctorName,
+        doctorSpeciality: userData.doctorSpeciality,
+        doctorEmail: userData.doctorEmail,
+        doctorEducation: userData.doctorEducation,
+        doctorExperience: userData.doctorExperience,
+        doctorAbout: userData.doctorAbout || null
+      };
+      const response = await axios.post(
+        `${backendUrl}/Doctor/AddDoctor`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setUserData({
+        doctorProfileLink: "",
+        doctorName: "",
+        doctorSpeciality: "",
+        doctorEmail: "",
+        doctorEducation: "",
+        doctorExperience: "",
+        doctorAbout: ""
+      });
+
+      toast.success(response.data.message);
+      refreshDoctors();
+      setAddDoctor(false);
+
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+
+  }
 
   return (
     <div className='fixed inset-0 bg-black/50 z-50 flex justify-center items-center 
@@ -27,7 +103,7 @@ const AddDoctor = ({ setAddDoctor }) => {
                       max-h-[95vh] overflow-y-auto
                       p-8'>
 
-        <form className='flex flex-col gap-8'>
+        <form className='flex flex-col gap-8' onSubmit={onSubmitHandler}>
 
           <button
             type="button"
@@ -58,7 +134,7 @@ const AddDoctor = ({ setAddDoctor }) => {
             >
               {image ? (
                 <img
-                  src={image}
+                  src={URL.createObjectURL(image)}
                   alt="preview"
                   className="w-full h-full object-cover"
                 />
@@ -72,7 +148,7 @@ const AddDoctor = ({ setAddDoctor }) => {
               )}
             </label>
 
-            {image && (
+            {(image || userData.doctorProfileLink) && (
               <div className="absolute bottom-2 right-1/2 translate-x-16 flex gap-2">
                 <label
                   htmlFor="profileUpload"
@@ -100,6 +176,9 @@ const AddDoctor = ({ setAddDoctor }) => {
               </label>
               <input
                 type="text"
+                value={userData.doctorName}
+                name="doctorName"
+                onChange={onChangeHandler}
                 placeholder="Enter doctor name"
                 className='p-3 border border-gray-300 rounded-lg outline-none'
               />
@@ -109,12 +188,16 @@ const AddDoctor = ({ setAddDoctor }) => {
               <label className='font-medium'>
                 Speciality <span className='text-red-500'>*</span>
               </label>
-              <select className='p-3 border border-gray-300 rounded-lg outline-none'>
-                <option value="">Select Speciality</option>
-                <option>General Physician</option>
-                <option>Cardiologist</option>
-                <option>Dermatologist</option>
-                <option>Pediatrician</option>
+              <select value={userData.doctorSpeciality}
+                name="doctorSpeciality"
+                onChange={onChangeHandler} className='p-3 border border-gray-300 rounded-lg outline-none'>
+                <option value="" disabled>Select Speciality</option>
+                <option value="GeneralPhysician" >General Physician</option>
+                <option value="Gynecologist">Gynecologist</option>
+                <option value="Cardiologist">Cardiologist</option>
+                <option value="Dermatologist">Dermatologist</option>
+                <option value="Pediatricians">Pediatrician</option>
+                <option value="Gastroenterologist">Gastroenterologist</option>
               </select>
             </div>
 
@@ -124,6 +207,9 @@ const AddDoctor = ({ setAddDoctor }) => {
               </label>
               <input
                 type="email"
+                value={userData.doctorEmail}
+                name="doctorEmail"
+                onChange={onChangeHandler}
                 placeholder="Enter email"
                 className='p-3 border border-gray-300 rounded-lg outline-none'
               />
@@ -135,6 +221,9 @@ const AddDoctor = ({ setAddDoctor }) => {
               </label>
               <input
                 type="text"
+                value={userData.doctorEducation}
+                name="doctorEducation"
+                onChange={onChangeHandler}
                 placeholder="Enter education"
                 className='p-3 border border-gray-300 rounded-lg outline-none'
               />
@@ -144,12 +233,19 @@ const AddDoctor = ({ setAddDoctor }) => {
               <label className='font-medium'>
                 Experience <span className='text-red-500'>*</span>
               </label>
-              <select className='p-3 border border-gray-300 rounded-lg outline-none'>
-                <option value="">Select Experience</option>
-                <option>1 Year</option>
-                <option>2 Years</option>
-                <option>3 Years</option>
-                <option>5+ Years</option>
+              <select
+                value={userData.doctorExperience}
+                name="doctorExperience"
+                onChange={onChangeHandler}
+                className='p-3 border border-gray-300 rounded-lg outline-none'>
+                <option value="" disabled>Select Experience</option>
+                <option value="LessThanOneYear">Less Than 1 Year</option>
+                <option value="OneYear">1 Year</option>
+                <option value="TwoYears">2 Years</option>
+                <option value="ThreeYears">3 Years</option>
+                <option value="FourYears">4 Years</option>
+                <option value="FiveYears">5 Years</option>
+                <option value="MoreThanFiveYears">5+ Years</option>
               </select>
             </div>
 
@@ -160,6 +256,9 @@ const AddDoctor = ({ setAddDoctor }) => {
               About Doctor
             </label>
             <textarea
+              value={userData.doctorAbout}
+              name="doctorAbout"
+              onChange={onChangeHandler}
               rows="4"
               placeholder="Write about doctor..."
               className='p-3 border border-gray-300 rounded-lg outline-none resize-none'
@@ -170,7 +269,18 @@ const AddDoctor = ({ setAddDoctor }) => {
             type="submit"
             className='bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl'
           >
-            Add Doctor
+            {loading ? (
+              <div className='flex items-center justify-center'>
+                <ThreeDots
+                  height="24"
+                  width="40"
+                  color="#ffffff"
+                  visible={true}
+                />
+              </div>
+            ) : (
+              "Add Doctor"
+            )}
           </button>
 
         </form>

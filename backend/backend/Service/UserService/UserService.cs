@@ -24,7 +24,9 @@ namespace backend.Service.UserService
             {
                 new Claim(JwtRegisteredClaimNames.Sub,user.Id),
                 new Claim(JwtRegisteredClaimNames.Email,user.Email ?? ""),
+                            /*Name*/
                 new Claim(ClaimTypes.Name, user.UserName ?? ""),
+                            /*Role*/  /*then can readable the token*/
                 new Claim(ClaimTypes.Role, role)
             };
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? throw new Exception("JWT Secret missing")));

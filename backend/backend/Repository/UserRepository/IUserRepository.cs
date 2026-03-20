@@ -16,5 +16,6 @@ namespace backend.Repository
         Task<bool> VerifyResetTokenAsync(User user, string token);
         Task<IdentityResult> ResetPasswordAsync(User user, string token, string newPassword);
         IQueryable<User> GetUsers();
+        Task<List<PatientDto>> GetPatientsDetails();
     }
 }

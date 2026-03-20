@@ -3,7 +3,7 @@ import { RxCross2 } from "react-icons/rx";
 import { useDeleteStore } from "../store/useDeleteStore";
 
 const DeletePopUp = () => {
-    const { isOpen, closeDelete, deleteCallback } = useDeleteStore();
+    const { isOpen, closeDelete, deleteCallback,loading, setLoading } = useDeleteStore();
     if (!isOpen) return null;
 
     return (
@@ -46,14 +46,17 @@ const DeletePopUp = () => {
 
                         <button
                             type="button"
-                            onClick={() => {
-                                deleteCallback?.();
+                            onClick={async () => {
+                                if (deleteCallback) {
+                                    setLoading(true)
+                                    await deleteCallback();
+                                }
                                 closeDelete();
                             }}
                             className='px-6 py-2 bg-red-600 text-white rounded-lg 
                          hover:bg-red-700 transition'
                         >
-                            Delete
+                            {!loading? <p>Delete</p>: <p>Deleting.....</p>}
                         </button>
 
                     </div>

@@ -105,6 +105,16 @@ const MyProfile = () => {
         }
       );
 
+      setUserData({
+        profileImageUrl: "",
+        userName: "",
+        email: "",
+        phoneNumber: "",
+        address: "",
+        gender: "",
+        birthday: ""
+      });
+
       toast.success(response.data.message);
       setIsEdit(false);
 
@@ -152,7 +162,7 @@ const MyProfile = () => {
               )}
             </label>
           </div>
-          {imageFile || userData.profileImageUrl && isEdit && (
+          {(imageFile || userData.profileImageUrl) && isEdit && (
             <div className="absolute bottom-2 right-0 flex gap-2">
               <label
                 htmlFor="profileUpload"
@@ -168,7 +178,6 @@ const MyProfile = () => {
               >
                 <FaTrash className="text-red-500 text-sm" />
               </button>
-
             </div>
           )}
         </div>

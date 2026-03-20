@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { assets } from '../assets/assets_frontend/assets.js';
 import { Link, NavLink } from "react-router-dom";
 import { useAuthStore } from '../store/useAuthStore.js';
 import { navItems } from '../constants/constants.js';
 import { useNavigate, useLocation } from "react-router-dom";
+import axios from 'axios';
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -12,6 +13,27 @@ const NavBar = () => {
   const token = useAuthStore((state) => state.token);
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
+  const backendUrl = useAuthStore((state) => state.backendUrl);
+  const [userImage,setUserImage] = useState("");
+
+  useEffect(() => {
+    if (!token) return;
+    const initialProfile = async () => {
+      try {
+        const response = await axios.get(`${backendUrl}/User/Profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setUserImage(response.data.user.userImageUrl)
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    initialProfile();
+
+  }, [backendUrl, token]);
 
   return (
     <nav className='py-4 flex items-center justify-between border-b border-b-gray-400'>
@@ -24,7 +46,7 @@ const NavBar = () => {
       {token ?
         <div className='relative group hidden lg:block'>
           <div className='flex items-center justify-center gap-2 '>
-            <div className='w-9 h-9 rounded-full  flex items-center justify-center bg-gray-600 text-white font-semibold'>{user.name.slice(0,1)}</div>
+            <div className='w-9 h-9 rounded-full  flex items-center justify-center bg-gray-600 text-white font-semibold'>{userImage ?<img src={userImage} alt="user image" /> :user.name.slice(0,1)}</div>
             <img src={assets.dropdown_icon} className='w-2.5' />
             <div className='absolute top-0 right-0  pt-14 text-base  font-medium text-gray-400 z-20 hidden group-hover:block'>
               <div className='min-w-48 bg-stone-100 rounded-2xl flex flex-col gap-4 p-4'>
