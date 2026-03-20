@@ -1,19 +1,70 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { RxCross2 } from "react-icons/rx";
 import { IoMdAdd } from "react-icons/io";
+import { useAuthStore } from '../store/useAuthStore.js';
+import { ThreeDots } from 'react-loader-spinner';
+import axios from 'axios';
+import toast from "react-hot-toast";
 
-const EditAppointment = ({ setEditAppointment }) => {
 
+const EditAppointment = ({ setEditAppointment, refreshAppointment, updateAppointmentId }) => {
   const [showForm, setShowForm] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-
+  const token = useAuthStore((state) => state.token);
+  const backendUrl = useAuthStore((state) => state.backendUrl);
+  const [loading, setLoading] = useState(false)
+  const [form, setForm] = useState({
+    doctorId: "",
+    fee: "",
+    doctorScheduleTimes: []
+  })
   const [appointmentDetails, setAppointmentDetails] = useState({
-    date: "",
-    time: "",
-    appointment: ""
+    scheduleDate: "",
+    scheduleTime: "",
+    allowedAppointments: ""
   });
-
+  const [doctorList, setDoctorList] = useState([]);
   const [appointmentsList, setAppointmentsList] = useState([]);
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    const InitializeDoctors = async () => {
+      try {
+        const response = await axios.get(
+          `${backendUrl}/Doctor/GetDoctorList`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setDoctorList(response.data.doctorList || response.data)
+      } catch (error) {
+        console.error(error.response?.data?.message || "Something went wrong");
+      }
+    }
+
+    const initializeAppointment = async () => {
+      try {
+        setLoading(true);
+
+        const response = await axios.get(
+          `${backendUrl}/Appointment/GetAppointment/${updateAppointmentId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        const appointment = response.data.appointment || response.data;
+        setForm(appointment)
+        setAppointmentsList(appointment.doctorScheduleTimes)
+
+      } catch (error) {
+        console.error(error || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    }
+    InitializeDoctors();
+    initializeAppointment();
+  }, [backendUrl, token, updateAppointmentId])
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,11 +75,22 @@ const EditAppointment = ({ setEditAppointment }) => {
   };
 
   const handleAddDetail = () => {
-    if (!appointmentDetails.date || !appointmentDetails.time || !appointmentDetails.appointment) {
-      alert("Please fill all fields");
+    if (!appointmentDetails.scheduleDate || !appointmentDetails.scheduleTime || !appointmentDetails.allowedAppointments) {
+      setError("Please fill all fields");
       return;
     }
 
+    const today = new Date()
+    const tommorow = new Date()
+    tommorow.setDate(today.getDate() + 7)
+
+    const appointmentDateandTime = new Date(appointmentDetails.scheduleDate)
+    if (appointmentDateandTime < tommorow) {
+      setError("Please fill the future times more than week");
+      return;
+    }
+
+    setError("")
     if (editIndex !== null) {
       const updatedList = [...appointmentsList];
       updatedList[editIndex] = appointmentDetails;
@@ -39,9 +101,9 @@ const EditAppointment = ({ setEditAppointment }) => {
     }
 
     setAppointmentDetails({
-      date: "",
-      time: "",
-      appointment: ""
+      scheduleDate: "",
+      scheduleTime: "",
+      allowedAppointments: ""
     });
 
     setShowForm(false);
@@ -57,15 +119,65 @@ const EditAppointment = ({ setEditAppointment }) => {
     setShowForm(true);
   };
 
+  const onChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true)
+      const updatedList = appointmentsList.map((item, index) => ({
+        appointmentId: index + 1,
+        appointmentDate: item.scheduleDate,
+        appointmentTime: item.scheduleTime,
+        appointmentSlot: Number(item.allowedAppointments)
+      }));
+      if (updatedList.length === 0) {
+        setError("Must be add the appointment date and time");
+        return;
+      }
+
+      const payload = { ...form, doctorAppointmentList: updatedList };
+      const response = await axios.put(
+        `${backendUrl}/Appointment/UpdateAppointment/${updateAppointmentId}`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      setForm({
+        doctorId: "",
+        doctorFree: "",
+        doctorAppointmentList: []
+      });
+      setAppointmentDetails({
+        appointmentDate: "",
+        appointmentTime: "",
+        appointmentSlot: ""
+      });
+      toast.success(response.data.message);
+      setEditAppointment(false)
+      refreshAppointment()
+
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
   return (
     <div className='fixed inset-0 bg-black/50 z-50 flex justify-center items-center overflow-y-auto p-4'>
       <div className='relative bg-white rounded-2xl p-6 shadow-xl 
                       w-[95%] sm:w-[80%] md:w-[65%] lg:w-[50%]
                       max-h-[90vh] overflow-y-auto'>
-        <form className='flex flex-col gap-6'>
+        <form className='flex flex-col gap-6' onSubmit={onSubmitHandler}>
           <button
             type="button"
-            onClick={() => setEditAppointment(false)}
+            onClick={() => { setError(""); setEditAppointment(false) }}
             className="absolute top-4 right-4"
           >
             <RxCross2 className="w-6 h-6" />
@@ -78,11 +190,13 @@ const EditAppointment = ({ setEditAppointment }) => {
             <label className="font-medium">
               Doctor Name <span className='text-red-500'>*</span>
             </label>
-            <select className="p-2 border border-gray-300 rounded-lg outline-none">
-              <option value="">Select Doctor</option>
-              <option value="dr-richard">Dr. Richard James</option>
-              <option value="dr-sarah">Dr. Sarah Parker</option>
-              <option value="dr-david">Dr. David Wilson</option>
+            <select className="p-2 border border-gray-300 rounded-lg outline-none" value={form.doctorId} name="doctorId" onChange={onChangeHandler}>
+              <option value="" disabled>Select Doctor</option>
+              {
+                doctorList.map(item =>
+                  <option key={item.doctorId} value={item.doctorId}>{item.doctorName}</option>
+                )
+              }
             </select>
           </div>
 
@@ -92,6 +206,9 @@ const EditAppointment = ({ setEditAppointment }) => {
             </label>
             <input
               type='number'
+              onChange={onChangeHandler}
+              value={form.fee}
+              name="fee"
               placeholder='Enter the fee'
               className='p-2 border border-gray-300 rounded-lg outline-none'
             />
@@ -109,9 +226,9 @@ const EditAppointment = ({ setEditAppointment }) => {
                   setShowForm(true);
                   setEditIndex(null);
                   setAppointmentDetails({
-                    date: "",
-                    time: "",
-                    appointment: ""
+                    scheduleDate: "",
+                    scheduleTime: "",
+                    allowedAppointments: ""
                   });
                 }}
                 className="flex items-center gap-1 text-blue-600"
@@ -134,9 +251,9 @@ const EditAppointment = ({ setEditAppointment }) => {
                 <div key={index} className='grid grid-cols-5 text-sm items-center py-2 '>
 
                   <p className='text-center'>{index + 1}</p>
-                  <p className='text-center'>{item.date}</p>
-                  <p className='text-center'>{item.time}</p>
-                  <p className='text-center'>{item.appointment}</p>
+                  <p className='text-center'>{item.scheduleDate}</p>
+                  <p className='text-center'>{item.scheduleTime}</p>
+                  <p className='text-center'>{item.allowedAppointments}</p>
 
                   <div className="flex justify-center gap-3">
                     <button
@@ -184,8 +301,8 @@ const EditAppointment = ({ setEditAppointment }) => {
                   </label>
                   <input
                     type="date"
-                    name="date"
-                    value={appointmentDetails.date}
+                    name="scheduleDate"
+                    value={appointmentDetails.scheduleDate}
                     onChange={handleChange}
                     className='p-2 border border-gray-300 rounded-lg outline-none'
                   />
@@ -197,8 +314,8 @@ const EditAppointment = ({ setEditAppointment }) => {
                   </label>
                   <input
                     type="time"
-                    name="time"
-                    value={appointmentDetails.time}
+                    name="scheduleTime"
+                    value={appointmentDetails.scheduleTime}
                     onChange={handleChange}
                     className='p-2 border border-gray-300 rounded-lg outline-none'
                   />
@@ -210,9 +327,9 @@ const EditAppointment = ({ setEditAppointment }) => {
                   </label>
                   <input
                     type="number"
-                    name="appointment"
+                    name="allowedAppointments"
                     placeholder='Enter number'
-                    value={appointmentDetails.appointment}
+                    value={appointmentDetails.allowedAppointments}
                     onChange={handleChange}
                     className='p-2 border border-gray-300 rounded-lg outline-none'
                   />
@@ -225,18 +342,34 @@ const EditAppointment = ({ setEditAppointment }) => {
                 onClick={handleAddDetail}
                 className='bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg'
               >
-                {editIndex !== null ? "Update Detail" : "Save Detail"}
+                {editIndex !== null ? "Update Details" : "Save Details"}
               </button>
 
             </div>
           )}
+
+          <div>
+            <p>
+              {error && <span className="text-base text-red-500">{error}</span>}
+            </p>
+          </div>
           <button
             type="submit"
             className='bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl'
           >
-            Edit Appointment
+            {loading ? (
+              <div className='flex items-center justify-center'>
+                <ThreeDots
+                  height="24"
+                  width="40"
+                  color="#ffffff"
+                  visible={true}
+                />
+              </div>
+            ) : (
+              "Edit Appointment"
+            )}
           </button>
-
         </form>
 
       </div>

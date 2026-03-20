@@ -22,7 +22,7 @@ const DoctorList = () => {
   const [doctorEditId, setDoctorEditId] = useState();
   const [searchDoctor, setSearchDoctor] = useState("");
 
-  const fetchDoctors = useCallback(async () => { 
+  const fetchDoctors = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(
@@ -39,12 +39,12 @@ const DoctorList = () => {
     } finally {
       setLoading(false);
     }
-  },[backendUrl, token, setDoctors]);
+  }, [backendUrl, token, setDoctors]);
 
   useEffect(() => {
-  if (doctors.length > 0) return;
-  fetchDoctors();
-}, [fetchDoctors, doctors.length]);
+    if (doctors.length > 0) return;
+    fetchDoctors();
+  }, [fetchDoctors, doctors.length]);
 
   const deleteDoctor = async (deleteDoctorId) => {
     try {
@@ -58,13 +58,13 @@ const DoctorList = () => {
       fetchDoctors();
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
-    } 
+    }
   }
 
-  const filterData = doctors.filter((item) =>{
-      const filterDoctorName =item.doctorName?.toLowerCase().includes(searchDoctor.toLowerCase())
-      return filterDoctorName
-});
+  const filterData = doctors.filter((item) => {
+    const filterDoctorName = item.doctorName?.toLowerCase().includes(searchDoctor.toLowerCase())
+    return filterDoctorName
+  });
 
   return (
     <div>
@@ -81,7 +81,7 @@ const DoctorList = () => {
       </div>
 
       <div className='mt-2 flex flex-col'>
-        {loading ? <div> Loading ... </div> : filterData.length>0 ?
+        {loading ? <div> Loading ... </div> : filterData.length > 0 ?
           filterData.map((item, index) => (
             <div
               key={item.doctorId}
@@ -129,7 +129,7 @@ const DoctorList = () => {
 
             </div>
           ))
-        :<p>No doctors founded</p>}
+          : <p>No doctors founded</p>}
       </div>
       {addDoctor && <AddDoctor setAddDoctor={setAddDoctor} refreshDoctors={fetchDoctors} />}
       {editDoctor && <EditDoctor setEditDoctor={setEditDoctor} doctorEditId={doctorEditId} refreshDoctors={fetchDoctors} />}
