@@ -27,7 +27,6 @@ const Doctors = () => {
         }
       );
       setDoctors(response.data.doctors || response.data);
-      console.log(response.data.doctors)
 
     } catch (error) {
       console.error(error || "Something went wrong");

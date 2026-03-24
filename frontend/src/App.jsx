@@ -24,7 +24,9 @@ import PrivateRoute from './components/PrivateRoute'
 import ResetPassword from './pages/CommonPage/ResetPassword';
 import { useAuthStore } from './store/useAuthStore';
 import axios from 'axios';
-
+import MessageBox from './components/MessageShowBox';
+import Payment from './pages/Patient/Payment';
+import Success from './pages/Patient/Success';
 
 function App() {
   const location = useLocation()
@@ -68,6 +70,8 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/my-appointment" element={<PrivateRoute> <MyAppointments /></PrivateRoute>} />
           <Route path="/my-profile" element={<PrivateRoute><MyProfile /></PrivateRoute>} />
+          <Route path="/payment/:id" element={<PrivateRoute><Payment /></PrivateRoute>} />
+          <Route path="/success/:id" element={<PrivateRoute><Success /></PrivateRoute>} />
         </Route>
 
         <Route element={<AdminLayout />}>
@@ -92,6 +96,7 @@ function App() {
 
 
       <DeletePopUp />
+      <MessageBox />
     </>
   )
 }

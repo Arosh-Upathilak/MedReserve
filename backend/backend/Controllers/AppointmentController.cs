@@ -1,3 +1,4 @@
+using backend.Dtos;
 using backend.Dtos.Appointment;
 using backend.Models;
 using backend.Repository.AppointmentRepository;
@@ -143,13 +144,9 @@ namespace backend.Controllers
         }
 
         [HttpGet("DoctorDetailsGetById/{doctorId}")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> DoctorAppointmentDetailsGetById(string doctorId)
         {
-            var user = await _iuserService.GetCurrentUser();
-            if (user == null)
-                return Unauthorized(new { message = "Invalid token or user not found" });
-
             var doctor = await _appointmentRepository.DoctorAppointmentDetailsGetById(doctorId);
             if (doctor == null)
                 return BadRequest();
@@ -158,6 +155,82 @@ namespace backend.Controllers
             {
                 doctor,
                 message = "Appointment delete successfully",
+            });
+        }
+
+        [HttpPost("SaveDoctorAppointment")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> SaveDoctorAppointment(SaveDoctorAppointmentDto saveDoctorAppointmentDto)
+        {
+            var user = await _iuserService.GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "Invalid token or user not found" });
+
+
+            var saveAppointment = new Appointment
+            {
+                UserId = user.Id,
+                UserName = user.Email,
+                DoctorId = Guid.Parse(saveDoctorAppointmentDto.doctorId),
+                Fee = saveDoctorAppointmentDto.Fee,
+                DoctorScheduleTimeId = Guid.Parse(saveDoctorAppointmentDto.doctorScheduleTimeId),
+                Status = AppointmentStatus.Pending,
+            };
+
+            var appointment = await _appointmentRepository.SaveDoctorAppointment(saveAppointment);
+
+
+            return Ok(new
+            {
+                appointment,
+                message = "Appointment add to cart successfully",
+            });
+        }
+
+        [HttpGet("GetDoctorAppointmentByUser")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> GetDoctorAppointmentByUser()
+        {
+            var user = await _iuserService.GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "Invalid token or user not found" });
+            var appointments = await _appointmentRepository.GetDoctorAppointmentByUserId(user.Id);
+            return Ok(new
+            {
+                appointments,
+                message = "Appointment add to cart successfully",
+            });
+        }
+
+        [HttpDelete("DeleteDoctorAppointment/{appointmentId}")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> DeleteDoctorAppointment(string appointmentId)
+        {
+            var user = await _iuserService.GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "Invalid token or user not found" });
+            await _appointmentRepository.DeleteDoctorAppointment(appointmentId);
+
+            return Ok(new
+            {
+                message = "Appointment delete to cart successfully",
+            });
+        }
+
+
+        [HttpGet("GetAppointmentByAppointmentId/{appointmentId}")]
+        [Authorize]
+        public async Task<IActionResult> GetAppointmentByAppointmentId(string appointmentId)
+        {
+            var user = await _iuserService.GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "Invalid token or user not found" });
+            var appointment = await _appointmentRepository.GetAppointmentByAppointmentId(appointmentId);
+
+            return Ok(new
+            {
+                appointment,
+                message = "Appointment details getting successfully",
             });
         }
     }

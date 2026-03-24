@@ -53,7 +53,7 @@ namespace backend.Data
 
             builder.Entity<Payment>()
                 .HasOne(payment => payment.Appointment)
-                .WithOne()
+                .WithOne(appointment => appointment.Payment)
                 .HasForeignKey<Payment>(payment => payment.AppointmentId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

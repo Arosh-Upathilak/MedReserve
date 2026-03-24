@@ -22,9 +22,9 @@ const BookingTimeCard = ({ active, onClick, fee, scheduleTimes }) => {
             </div>
             <div className='flex items-center gap-2'>
                 <p >Booking slots : </p>
-                <p>{scheduleTimes.allowedAppointments}</p>
+                 <p>{scheduleTimes.bookedAppointments}</p>
+                <p></p>
             </div>
-
         </div>
     )
 }

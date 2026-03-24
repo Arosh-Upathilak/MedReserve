@@ -11,14 +11,13 @@ namespace backend.Models
         public Appointment? Appointment { get; set; }
         public decimal Amount { get; set; }
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
+        public string? QrCode { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
     public enum PaymentStatus
     {
         Pending,
         Paid,
-        Failed,
         Cancelled,
-        Refunded
     }
 }

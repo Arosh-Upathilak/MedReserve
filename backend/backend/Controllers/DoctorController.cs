@@ -108,13 +108,9 @@ namespace backend.Controllers
         }
 
         [HttpGet("GetDoctors")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDoctors()
         {
-            var user = await _iuserService.GetCurrentUser();
-            if (user == null)
-                return Unauthorized(new { message = "Invalid token or user not found" });
-
             var doctors = await _idoctorRepository.GetAllDoctors();
             return Ok(new
             {
@@ -124,13 +120,9 @@ namespace backend.Controllers
         }
 
         [HttpGet("GetDoctor/{doctorId}")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDoctor(Guid doctorId)
         {
-            var user = await _iuserService.GetCurrentUser();
-            if (user == null)
-                return Unauthorized(new { message = "Invalid token or user not found" });
-
             var currentDoctor = await _idoctorRepository.GetDoctorById(doctorId);
             return Ok(new
             {

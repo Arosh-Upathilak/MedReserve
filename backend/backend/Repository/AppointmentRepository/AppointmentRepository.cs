@@ -134,14 +134,104 @@ namespace backend.Repository.AppointmentRepository
                         s.Fee,
                         scheduleTimes = s.ScheduleTimes.Select(st => new
                         {
+                            bookedAppointments = _applicationDbContext.Appointments
+                                .Where(a => a.DoctorScheduleTimeId == st.DoctorScheduleTimeId)
+                                .Select(a => (int?)a.AppointmentNumber)
+                                .Max() ?? 0,
                             st.DoctorScheduleTimeId,
                             st.ScheduleDate,
                             st.ScheduleTime,
                             st.AllowedAppointments
-                        }).ToList()
+                        }).ToList(),
+
                     }).ToList()
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<Appointment> SaveDoctorAppointment(Appointment appointment)
+        {
+            var maxNumber = await _applicationDbContext.Appointments
+                .Where(a => a.DoctorScheduleTimeId == appointment.DoctorScheduleTimeId)
+                .Select(a => (int?)a.AppointmentNumber)
+                .MaxAsync() ?? 0;
+
+            appointment.AppointmentNumber = maxNumber + 1;
+
+            await _applicationDbContext.Appointments.AddAsync(appointment);
+            await _applicationDbContext.SaveChangesAsync();
+            return appointment;
+        }
+
+        public async Task<object> GetDoctorAppointmentByUserId(string userId)
+        {
+            return await _applicationDbContext.Appointments.Where(appointment => appointment.UserId == userId)
+                .Select(appointment => new
+                {
+                    appointment.AppointmentId,
+                    appointment.DoctorId,
+                    appointment.Doctor!.DoctorName,
+                    appointment.Doctor!.DoctorImageUrl,
+                    appointment.DoctorScheduleTimeId,
+                    appointment.AppointmentNumber,
+                    appointment.Fee,
+                    appointment.Status,
+                    appointment.DoctorScheduleTime!.ScheduleDate,
+                    appointment.DoctorScheduleTime!.ScheduleTime,
+                    appointment.CreatedAt,
+                    paymentId = appointment.Payment != null ? appointment.Payment.PaymentId : (Guid?)null
+                }).ToListAsync();
+        }
+
+        public async Task DeleteDoctorAppointment(string appointmentId)
+        {
+            var existingAppointment = await _applicationDbContext.Appointments
+                    .FirstOrDefaultAsync(a => a.AppointmentId == Guid.Parse(appointmentId));
+
+            if (existingAppointment == null)
+                throw new KeyNotFoundException("Appointment not found");
+
+            if (existingAppointment.Status == AppointmentStatus.Completed)
+                throw new Exception("You cannot delete because you already paid for this");
+
+            _applicationDbContext.Appointments.Remove(existingAppointment);
+            await _applicationDbContext.SaveChangesAsync();
+        }
+
+        public async Task<AppointmentAllDetailsDto?> GetAppointmentByAppointmentId(string appointmentId)
+        {
+            return await _applicationDbContext.Appointments
+                .Where(a => a.AppointmentId == Guid.Parse(appointmentId))
+                .Select(a => new AppointmentAllDetailsDto
+                {
+                    AppointmentId = a.AppointmentId,
+                    DoctorId = a.DoctorId,
+                    DoctorName = a.Doctor!.DoctorName,
+                    DoctorImageUrl = a.Doctor!.DoctorImageUrl,
+                    Speciality = a.Doctor.Speciality,
+                    DoctorScheduleTimeId = a.DoctorScheduleTimeId,
+                    AppointmentNumber = a.AppointmentNumber,
+                    Fee = a.Fee,
+                    Status = a.Status.ToString(),
+                    ScheduleDate = a.DoctorScheduleTime!.ScheduleDate,
+                    ScheduleTime = a.DoctorScheduleTime.ScheduleTime,
+                    CreatedAt = a.CreatedAt
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Appointment> ChangeAppointmentStatusById(string appointmentId)
+        {
+            var id = Guid.Parse(appointmentId);
+            var appointment = await _applicationDbContext.Appointments
+                .FirstOrDefaultAsync(a => a.AppointmentId == id);
+
+            if (appointment == null)
+                throw new Exception("Appointment not found");
+
+            appointment.Status = AppointmentStatus.Completed;
+            await _applicationDbContext.SaveChangesAsync();
+            return appointment;
         }
     }
 }

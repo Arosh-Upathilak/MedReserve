@@ -7,14 +7,19 @@ import BookingTimeCard from "../../components/BookingTimeCard";
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useMessagePopUpStore } from "../../store/useMessagePopUpStore";
+import toast from "react-hot-toast";
+import { useLocation } from "react-router-dom";
+
 
 const DoctorDetails = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const token = useAuthStore((state) => state.token);
   const backendUrl = useAuthStore((state) => state.backendUrl);
-  const [activeTimeSlot, setActiveTimeSlot] = useState(false);
-  const [loading, setLoading] = useState(false)
+  const [activeTimeSlot, setActiveTimeSlot] = useState(null);
   const { id } = useParams();
+  const { setMessageBoxOpen, loading, setLoading } = useMessagePopUpStore();
   const [doctorDetails, setDoctorDetails] = useState({
     doctorId: "",
     doctorEmail: "",
@@ -26,18 +31,20 @@ const DoctorDetails = () => {
     about: "",
     schedules: []
   })
+  const [appointment, setAppointment] = useState({
+    doctorId: "",
+    fee: 0,
+    appointmentNumber: 0,
+    doctorScheduleTimeId: ""
+  });
   useEffect(() => {
     const initializeDoctor = async () => {
       try {
         setLoading(true)
         const response = await axios.get(
-          `${backendUrl}/Appointment/DoctorDetailsGetById/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
-        console.log(response)
+          `${backendUrl}/Appointment/DoctorDetailsGetById/${id}`);
         setDoctorDetails(response.data.doctor || response.data)
+        setLoading(false);
       } catch (error) {
         console.error(error || "Something went wrong");
       } finally {
@@ -45,7 +52,25 @@ const DoctorDetails = () => {
       }
     }
     initializeDoctor();
-  }, [token, backendUrl,id])
+  }, [token, backendUrl, id, setLoading])
+
+  const bookAppointment = async () => {
+
+    try {
+      setLoading(true)
+      const response = await axios.post(`${backendUrl}/Appointment/SaveDoctorAppointment`, appointment,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      toast.success(response.data.message);
+      navigate("/my-appointment");
+
+    } catch (error) {
+      console.error(error || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="my-10">
@@ -62,7 +87,7 @@ const DoctorDetails = () => {
             <div className="md:col-span-1 ">
               <div className="rounded-md bg-header-bg h-full">
                 <img
-                  src={doctorDetails.doctorImageUrl}
+                  src={doctorDetails.doctorImageUrl ? doctorDetails.doctorImageUrl : null}
                   alt="doctor"
                   className="w-full h-full object-cover rounded-md"
                 />
@@ -100,19 +125,49 @@ const DoctorDetails = () => {
             <div className="md:col-span-1 hidden md:block" />
             <div className="md:col-span-3">
               <div className="flex flex-wrap py-4 gap-4">
-
-                {doctorDetails?.schedules?.map(schedules => schedules.scheduleTimes.map((item, index) => <BookingTimeCard
+                {doctorDetails?.schedules?.map(schedules => schedules.scheduleTimes.map((item, index) => (<BookingTimeCard
                   key={index}
                   fee={schedules.fee}
                   scheduleTimes={item}
                   active={activeTimeSlot === item.doctorScheduleTimeId}
-                  onClick={() =>setActiveTimeSlot(prev => prev === item.doctorScheduleTimeId? null:item.doctorScheduleTimeId)}
-                />))}
+                  onClick={() => {
+                    if (item.allowedAppointments - (item.bookedAppointments + 1) <= 0) {
+                      setMessageBoxOpen(
+                        true,
+                        "You can't book this appointment because it's full",
+                        false
+                      );
+                      return;
+                    }
+                    setAppointment({
+                      doctorId: doctorDetails.doctorId,
+                      fee: schedules.fee,
+                      doctorScheduleTimeId: item.doctorScheduleTimeId
+                    })
+
+                    setActiveTimeSlot(prev => prev === item.doctorScheduleTimeId ? null : item.doctorScheduleTimeId)
+                  }}
+                />)))}
 
               </div>
-              <button className="py-2 px-4 bg-form-btn text-white rounded-lg hover:text-white/50">
-                Book Appointment
-              </button>
+              {doctorDetails?.schedules.length > 0 &&
+                <button disabled={!appointment.doctorScheduleTimeId} className="py-2 px-4 bg-form-btn text-white rounded-lg hover:text-white/50" onClick={() => {
+                  if (!token) {
+                    navigate("/login", {
+                      state: { backgroundLocation: location }
+                    }); 
+                    return;
+                  }
+
+                  if (!appointment.doctorScheduleTimeId) {
+                    setMessageBoxOpen(true, "Please select a time slot", false);
+                    return;
+                  }
+
+                  setMessageBoxOpen(bookAppointment, "Are you want to book this appointment", true)
+                }}>
+                  Book Appointment
+                </button>}
             </div>
           </div>
         </>}
