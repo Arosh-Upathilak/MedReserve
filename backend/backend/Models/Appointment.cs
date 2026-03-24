@@ -22,15 +22,17 @@ namespace backend.Models
         [Required]
         public Guid DoctorScheduleTimeId { get; set; }
         public DoctorScheduleTime? DoctorScheduleTime { get; set; }
+        [Required]
+        public int AppointmentNumber { get; set; }
 
         public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
+        public Payment? Payment { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 
     public enum AppointmentStatus
     {
         Pending,
-        Confirmed,
         Cancelled,
         Completed
     }

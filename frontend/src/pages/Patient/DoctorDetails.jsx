@@ -1,15 +1,76 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaLongArrowAltLeft } from "react-icons/fa";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { HiCheckBadge } from "react-icons/hi2";
-import { doctors } from "../../assets/assets_frontend/assets";
 import BookingTimeCard from "../../components/BookingTimeCard";
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useMessagePopUpStore } from "../../store/useMessagePopUpStore";
+import toast from "react-hot-toast";
+import { useLocation } from "react-router-dom";
+
 
 const DoctorDetails = () => {
   const navigate = useNavigate();
-  const doctor = doctors[0];
-  const [activeTimeSlot, setActiveTimeSlot] = useState(false);
+  const location = useLocation();
+  const token = useAuthStore((state) => state.token);
+  const backendUrl = useAuthStore((state) => state.backendUrl);
+  const [activeTimeSlot, setActiveTimeSlot] = useState(null);
+  const { id } = useParams();
+  const { setMessageBoxOpen, loading, setLoading } = useMessagePopUpStore();
+  const [doctorDetails, setDoctorDetails] = useState({
+    doctorId: "",
+    doctorEmail: "",
+    doctorImageUrl: "",
+    doctorName: "",
+    education: "",
+    speciality: "",
+    experience: "",
+    about: "",
+    schedules: []
+  })
+  const [appointment, setAppointment] = useState({
+    doctorId: "",
+    fee: 0,
+    appointmentNumber: 0,
+    doctorScheduleTimeId: ""
+  });
+  useEffect(() => {
+    const initializeDoctor = async () => {
+      try {
+        setLoading(true)
+        const response = await axios.get(
+          `${backendUrl}/Appointment/DoctorDetailsGetById/${id}`);
+        setDoctorDetails(response.data.doctor || response.data)
+        setLoading(false);
+      } catch (error) {
+        console.error(error || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    }
+    initializeDoctor();
+  }, [token, backendUrl, id, setLoading])
+
+  const bookAppointment = async () => {
+
+    try {
+      setLoading(true)
+      const response = await axios.post(`${backendUrl}/Appointment/SaveDoctorAppointment`, appointment,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      toast.success(response.data.message);
+      navigate("/my-appointment");
+
+    } catch (error) {
+      console.error(error || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="my-10">
@@ -20,74 +81,96 @@ const DoctorDetails = () => {
         <FaLongArrowAltLeft />
         <p>Back</p>
       </div>
-
-      <div className="mt-10 grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
-        <div className="md:col-span-1 ">
-          <div className="rounded-md bg-header-bg h-full">
-            <img
-              src={doctor.image}
-              alt="doctor"
-              className="w-full h-full object-cover rounded-md"
-            />
-          </div>
-        </div>
-
-        <div className="md:col-span-3 rounded-md border border-gray-400 p-8 md:p-10 flex flex-col gap-4 ">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl md:text-3xl font-medium text-gray-700">
-              {doctor.name}
-            </h1>
-            <HiCheckBadge className="text-blue-800 w-6 h-6" />
-          </div>
-
-          <div className="flex flex-wrap gap-2 items-center text-xs md:text-sm text-gray-600">
-            <p>{doctor.degree}</p>
-            <p>-</p>
-            <p>{doctor.speciality}</p>
-            <p className="px-3 py-1 border border-gray-400 rounded-full text-xs">
-              {doctor.experience}
-            </p>
-          </div>
-
-          <div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-medium">About</p>
-              <AiOutlineInfoCircle className="w-4 h-4 text-gray-600" />
+      {loading ? <div>Loading... </div> :
+        <>
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
+            <div className="md:col-span-1 ">
+              <div className="rounded-md bg-header-bg h-full">
+                <img
+                  src={doctorDetails.doctorImageUrl ? doctorDetails.doctorImageUrl : null}
+                  alt="doctor"
+                  className="w-full h-full object-cover rounded-md"
+                />
+              </div>
             </div>
-            <p className="text-sm text-gray-600 mt-1">{doctor.about}</p>
-          </div>
 
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <p className="text-gray-600">Appointment fee:</p>
-            <p>RS. {doctor.fees} /-</p>
-          </div>
-        </div>
-      </div>
+            <div className="md:col-span-3 rounded-md border border-gray-400 p-8 md:p-10 flex flex-col gap-4 ">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl md:text-3xl font-medium text-gray-700">
+                  {doctorDetails.doctorName}
+                </h1>
+                <HiCheckBadge className="text-blue-800 w-6 h-6" />
+              </div>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="md:col-span-1 hidden md:block" />
-        <div className="md:col-span-3">
-          <div>
-             <p className="text-gray-700 font-medium">Available Booking slots :</p>
-          </div>
-          <div>
-            <p className="text-gray-700 font-medium">Booking slots : </p>
-            <div className="flex flex-wrap py-4 gap-4">
-              <BookingTimeCard
-                active={activeTimeSlot}
-                onClick={() => setActiveTimeSlot((prev) => !prev)}
-              />
-              <BookingTimeCard
-                active={activeTimeSlot}
-                onClick={() => setActiveTimeSlot((prev) => !prev)}
-              />
+              <div className="flex flex-wrap gap-2 items-center text-xs md:text-sm text-gray-600">
+                <p>{doctorDetails.speciality}</p>
+                <p className="px-3 py-1 border border-gray-400 rounded-full text-xs">
+                  {doctorDetails.experience}
+                </p>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">About</p>
+                  <AiOutlineInfoCircle className="w-4 h-4 text-gray-600" />
+                </div>
+                <p className="text-sm text-gray-600 mt-1">{doctorDetails.about}</p>
+              </div>
+
+
             </div>
           </div>
-          <button className="py-2 px-4 bg-form-btn text-white rounded-lg hover:text-white/50">
-            Book Appointment
-          </button>
-        </div>
-      </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="md:col-span-1 hidden md:block" />
+            <div className="md:col-span-3">
+              <div className="flex flex-wrap py-4 gap-4">
+                {doctorDetails?.schedules?.map(schedules => schedules.scheduleTimes.map((item, index) => (<BookingTimeCard
+                  key={index}
+                  fee={schedules.fee}
+                  scheduleTimes={item}
+                  active={activeTimeSlot === item.doctorScheduleTimeId}
+                  onClick={() => {
+                    if (item.allowedAppointments - (item.bookedAppointments + 1) <= 0) {
+                      setMessageBoxOpen(
+                        true,
+                        "You can't book this appointment because it's full",
+                        false
+                      );
+                      return;
+                    }
+                    setAppointment({
+                      doctorId: doctorDetails.doctorId,
+                      fee: schedules.fee,
+                      doctorScheduleTimeId: item.doctorScheduleTimeId
+                    })
+
+                    setActiveTimeSlot(prev => prev === item.doctorScheduleTimeId ? null : item.doctorScheduleTimeId)
+                  }}
+                />)))}
+
+              </div>
+              {doctorDetails?.schedules.length > 0 &&
+                <button disabled={!appointment.doctorScheduleTimeId} className="py-2 px-4 bg-form-btn text-white rounded-lg hover:text-white/50" onClick={() => {
+                  if (!token) {
+                    navigate("/login", {
+                      state: { backgroundLocation: location }
+                    }); 
+                    return;
+                  }
+
+                  if (!appointment.doctorScheduleTimeId) {
+                    setMessageBoxOpen(true, "Please select a time slot", false);
+                    return;
+                  }
+
+                  setMessageBoxOpen(bookAppointment, "Are you want to book this appointment", true)
+                }}>
+                  Book Appointment
+                </button>}
+            </div>
+          </div>
+        </>}
     </div>
   );
 };

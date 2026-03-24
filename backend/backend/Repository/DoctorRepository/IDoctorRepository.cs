@@ -11,5 +11,6 @@ namespace backend.Repository.DoctorRepository
         Task<Doctor?> GetDoctorById(Guid doctorId);
         Task SaveEditDoctor(Doctor doctor);
         Task DeleteDoctorById(Doctor doctor);
+        Task<object> GetDoctorList();
     }
 }

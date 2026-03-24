@@ -10,6 +10,11 @@ using backend.Repository;
 using backend.Service.CloudinaryService;
 using System.Text.Json.Serialization;
 using backend.Repository.DoctorRepository;
+using backend.Repository.AppointmentRepository;
+using backend.Service.AppointmentService;
+using backend.Service.ExchangeRateService;
+using backend.Service.QrService;
+using backend.Repository.PaymentRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,11 +94,17 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddHttpContextAccessor(); // for the service httpContextAccessor
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IExchangeRateService, ExchangeRateService>();
+//builder.Services.AddHttpClient<IExchangeRateService, ExchangeRateService>();
+builder.Services.AddScoped<IQrService, QrService>();
 
 // Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
-
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddHostedService<AppointmentCleanupWorker>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -106,7 +117,7 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
-
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 

@@ -12,7 +12,7 @@ namespace backend.Models
         public Doctor? Doctor { get; set; }
         [Required]
         public decimal Fee { get; set; }
-        public List<DoctorScheduleTime> ScheduleTimes { get; set; } = new();
+        public ICollection<DoctorScheduleTime> ScheduleTimes { get; set; } = new List<DoctorScheduleTime>();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

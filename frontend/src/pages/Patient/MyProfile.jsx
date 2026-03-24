@@ -95,8 +95,6 @@ const MyProfile = () => {
         birthday: userData.birthday || null,
         gender: userData.gender || null
       };
-
-      console.log(payload)
       const response = await axios.put(
         `${backendUrl}/User/ChangeProfile`,
         payload,

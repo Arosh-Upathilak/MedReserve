@@ -1,27 +1,64 @@
-import React, { useState } from 'react'
-import { assets, appointmentsData } from '../../assets/assets_admin/assets';
+import React, { useEffect, useState, useCallback } from 'react'
+import { assets } from '../../assets/assets_admin/assets';
 import { IoSearch } from "react-icons/io5";
+import { useAuthStore } from '../../store/useAuthStore';
+import { useDashBoardStore } from '../../store/useDashBoardStore';
+import axios from 'axios';
+import { timeConverter } from '../../utils/timeConverter.js'
+import { downloadExcel } from '../../utils/downloadExcel.js'
+
 
 const Dashboard = () => {
   const [searchDate, setSearchDate] = useState("");
   const [searchDoctor, setSearchDoctor] = useState("");
   const [searchPatient, setSearchPatient] = useState("");
+  const token = useAuthStore((state) => state.token);
+  const backendUrl = useAuthStore((state) => state.backendUrl);
+  const dashBoardStore = useDashBoardStore((state) => state.dashBoardStore);
+  const setDashBoardStore = useDashBoardStore((state) => state.setDashBoardStore);
+  const [loading, setLoading] = useState(false);
 
-  const filterData = appointmentsData.filter((item) => {
+  const fetchDashboard = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `${backendUrl}/Payment/GetAllPaymentDetails`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      setDashBoardStore(response.data.payments || response.data)
+    } catch (error) {
+      console.error(error || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }, [backendUrl, token, setDashBoardStore])
+
+  useEffect(() => {
+    if (dashBoardStore.length > 0) return;
+    fetchDashboard();
+  }, [fetchDashboard, dashBoardStore.length])
+
+
+
+  const filterData = dashBoardStore.filter((item) => {
 
     const doctorMatch = item.doctorName
       .toLowerCase()
       .includes(searchDoctor.toLowerCase());
 
-    const patientMatch = item.patientName
+    const patientMatch = item.userName
       .toLowerCase()
       .includes(searchPatient.toLowerCase());
 
     const dateMatch =
-      !searchDate || item.date === searchDate;
+      !searchDate || item.scheduleDate === searchDate;
 
     return doctorMatch && patientMatch && dateMatch;
   });
+
+
   return (
     <div>
       <div className='flex gap-4 items-center'>
@@ -65,7 +102,7 @@ const Dashboard = () => {
               <input type="text" placeholder='Enter the patient name' className='outline-0' value={searchPatient} onChange={(e) => setSearchPatient(e.target.value)} />
             </div>
           </div>
-          <button className='py-2 px-4 rounded-2xl bg-btn-bg hover:bg-btn-bg-hover text-white text-[14px]'>Download the Report</button>
+          <button className='py-2 px-4 rounded-2xl bg-btn-bg hover:bg-btn-bg-hover text-white text-[14px]' onClick={()=>downloadExcel(filterData)}>Download the Report</button>
         </div>
       </div>
 
@@ -87,29 +124,33 @@ const Dashboard = () => {
             </thead>
 
             <tbody>
-              {filterData.length > 0 ? filterData.map((item, index) => (
+              {loading ? <tr>
+                <td colSpan="6" className="text-center py-4">
+                  Loading.....
+                </td>
+              </tr> : filterData.length > 0 ? filterData.map((item, index) => (
                 <tr key={item.id} className="border">
 
                   <td className="p-3 border">{index + 1}</td>
 
                   <td className="p-3 border">
                     <div className="flex items-center gap-2">
-                      {item.patientName}
+                      {item.userName}
                     </div>
                   </td>
-                  <td className="p-3 border">{item.date} , {item.time}</td>
+                  <td className="p-3 border">{item.scheduleDate} , {timeConverter(item.scheduleTime)}</td>
                   <td className="p-3 border">
                     <div className="flex items-center gap-2">
                       <img
-                        src={item.doctorImage}
+                        src={item.doctorImageUrl}
                         alt=""
                         className="w-8 h-8 rounded-full"
                       />
                       {item.doctorName}
                     </div>
                   </td>
-                  <td className="p-3 border">{item.id}</td>
-                  <td className="p-3 border">RS: {item.fees}/=</td>
+                  <td className="p-3 border">{item.appointmentNumber}</td>
+                  <td className="p-3 border">RS: {item.fee}/=</td>
                 </tr>
               )) : (
                 <tr>
